@@ -35,7 +35,7 @@ class PinServiceTest {
     @Test
     void resetsAttemptsAfterCorrectPin() {
         user.setPinFailedAttempts(2);
-        service.verifyInNewTransaction(user.getId(), "123456");
+        service.verifyForTransfer(user.getId(), "123456");
         assertThat(user.getPinFailedAttempts()).isZero();
         assertThat(user.getPinBlockedUntil()).isNull();
     }
@@ -43,14 +43,13 @@ class PinServiceTest {
     @Test
     void blocksAfterFiveWrongAttempts() {
         for (int attempt = 1; attempt <= 5; attempt++) {
-            assertThatThrownBy(() -> service.verifyInNewTransaction(user.getId(), "000000"))
+            assertThatThrownBy(() -> service.verifyForTransfer(user.getId(), "000000"))
                     .isInstanceOf(ApiException.class);
         }
         assertThat(user.getPinFailedAttempts()).isEqualTo(5);
         assertThat(user.getPinBlockedUntil()).isNotNull();
-        assertThatThrownBy(() -> service.verifyInNewTransaction(user.getId(), "123456"))
+        assertThatThrownBy(() -> service.verifyForTransfer(user.getId(), "123456"))
                 .isInstanceOfSatisfying(ApiException.class,
                         error -> assertThat(error.getCode()).isEqualTo("PIN_TEMPORARILY_BLOCKED"));
     }
 }
-

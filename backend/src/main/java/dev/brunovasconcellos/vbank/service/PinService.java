@@ -48,13 +48,9 @@ public class PinService {
         auditService.record(user, "PIN_CHANGED", "SUCCESS", "USER", userId.toString(), null);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = ApiException.class)
     public void verifyForTransfer(UUID userId, String pin) {
         rateLimitService.consume("pin", userId.toString(), 12, Duration.ofMinutes(15));
-        verifyInNewTransaction(userId, pin);
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = ApiException.class)
-    public void verifyInNewTransaction(UUID userId, String pin) {
         User user = requireLocked(userId);
         verifyStateAndMatch(user, pin);
         if (user.getPinFailedAttempts() != 0 || user.getPinBlockedUntil() != null) {
@@ -89,4 +85,3 @@ public class PinService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "VALIDATION_ERROR", "Usuário não encontrado."));
     }
 }
-

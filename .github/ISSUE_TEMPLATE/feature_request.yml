@@ -1,0 +1,25 @@
+name: Sugerir uma melhoria
+description: Proponha uma evolução compatível com o objetivo educacional.
+title: "[Melhoria]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    attributes:
+      label: Problema ou oportunidade
+      description: Que necessidade a proposta atende?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Solução sugerida
+      description: Descreva o comportamento, os impactos e alternativas consideradas.
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Escopo
+      options:
+        - label: A proposta mantém o projeto como sandbox sem dinheiro real.
+          required: true
+        - label: A proposta pode ser implementada apenas com serviços gratuitos/open source.
+          required: true

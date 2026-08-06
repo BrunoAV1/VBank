@@ -1,0 +1,28 @@
+# syntax=docker/dockerfile:1.7
+# A Vercel reconhece este nome e constrói a imagem OCI remotamente.
+FROM node:24-alpine AS frontend-build
+WORKDIR /workspace/frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY frontend/ ./
+RUN npm test && npm run build
+
+FROM maven:3.9.11-eclipse-temurin-21-alpine AS backend-build
+WORKDIR /workspace/backend
+COPY backend/pom.xml ./
+RUN mvn -B -ntp dependency:go-offline
+COPY backend/src ./src
+COPY --from=frontend-build /workspace/frontend/dist ./src/main/resources/static
+RUN mvn -B -ntp -DskipTests package
+
+FROM eclipse-temurin:21-jre-alpine
+RUN addgroup -S vbank && adduser -S -G vbank -h /app vbank
+WORKDIR /app
+COPY --from=backend-build --chown=vbank:vbank /workspace/backend/target/vbank-sandbox-1.0.0.jar /app/vbank.jar
+USER vbank
+ENV PORT=8080
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom"
+EXPOSE 8080
+STOPSIGNAL SIGTERM
+CMD ["sh", "-c", "exec java $JAVA_OPTS -jar /app/vbank.jar"]
+

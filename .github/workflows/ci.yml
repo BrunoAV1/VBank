@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Testes unitários backend
+        working-directory: backend
+        run: |
+          chmod +x mvnw
+          ./mvnw -B -ntp test
+
+      - name: Testes de integração PostgreSQL/Testcontainers
+        working-directory: backend
+        run: ./mvnw -B -ntp -Pintegration-test verify
+
+      - name: Instalar frontend
+        working-directory: frontend
+        run: npm ci --no-audit --no-fund
+
+      - name: Testes frontend
+        working-directory: frontend
+        run: npm test
+
+      - name: Auditoria de dependências frontend
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Build backend
+        working-directory: backend
+        run: ./mvnw -B -ntp -DskipTests package
+
+      - name: Verificação básica de segredos
+        shell: bash
+        run: |
+          if git grep -nE 'BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|postgres(ql)?://[^[:space:]]+:[^[:space:]]+@' -- ':!*.md' ':!.env.example' ':!frontend/.env.example'; then
+            echo "Possível segredo encontrado no repositório"
+            exit 1
+          fi
+
+      - name: Build da imagem Vercel
+        run: docker build --file Dockerfile.vercel --tag vbank-sandbox:ci .

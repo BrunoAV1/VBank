@@ -1,0 +1,16 @@
+server:
+  forward-headers-strategy: framework
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:false}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: WARN
+

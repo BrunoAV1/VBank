@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Reportar vulnerabilidade
+    url: https://github.com/BrunoAV1/vbank-sandbox/security/advisories/new
+    about: Use um canal privado e não abra uma issue pública.

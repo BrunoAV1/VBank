@@ -1,0 +1,38 @@
+name: Relatar um bug
+description: Informe um comportamento reproduzível no sandbox.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: "Não publique credenciais, tokens ou dados pessoais reais. Vulnerabilidades devem seguir SECURITY.md."
+  - type: checkboxes
+    attributes:
+      label: Verificações
+      options:
+        - label: Confirmei que não se trata de uma vulnerabilidade de segurança.
+          required: true
+        - label: Pesquisei por issues existentes.
+          required: true
+  - type: textarea
+    attributes:
+      label: Comportamento observado
+      description: O que aconteceu e qual era o resultado esperado?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Como reproduzir
+      description: Passos mínimos, sem dados sensíveis.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Commit e ambiente
+      placeholder: "commit, sistema operacional, Java, Node e navegador"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Logs sanitizados
+      render: shell

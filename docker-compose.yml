@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: vbank
+      POSTGRES_USER: vbank
+      POSTGRES_PASSWORD: ${LOCAL_POSTGRES_PASSWORD:-vbank_local_only}
+    ports:
+      - "5432:5432"
+    volumes:
+      - vbank_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vbank -d vbank"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/vbank
+      SPRING_DATASOURCE_USERNAME: vbank
+      SPRING_DATASOURCE_PASSWORD: ${LOCAL_POSTGRES_PASSWORD:-vbank_local_only}
+      JWT_SECRET: ${JWT_SECRET:-docker-compose-development-secret-32-bytes-minimum}
+      COOKIE_SECURE: "false"
+      SWAGGER_ENABLED: "true"
+    ports:
+      - "8080:8080"
+
+volumes:
+  vbank_postgres:
+

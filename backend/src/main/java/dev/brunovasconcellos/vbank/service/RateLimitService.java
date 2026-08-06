@@ -10,7 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Duration;
-import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.HexFormat;
 
 @Service
@@ -24,8 +25,8 @@ public class RateLimitService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void consume(String scope, String subject, int maximum, Duration window) {
         String key = scope + ":" + sha256(subject == null ? "unknown" : subject);
-        Instant now = Instant.now();
-        Instant resetBefore = now.minus(window);
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        OffsetDateTime resetBefore = now.minus(window);
         Integer count = jdbcTemplate.queryForObject("""
                 INSERT INTO rate_limit_bucket(bucket_key, window_started_at, request_count)
                 VALUES (?, ?, 1)
@@ -47,4 +48,3 @@ public class RateLimitService {
         }
     }
 }
-

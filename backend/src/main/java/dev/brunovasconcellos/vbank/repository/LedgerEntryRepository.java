@@ -17,12 +17,12 @@ public interface LedgerEntryRepository extends JpaRepository<LedgerEntry, UUID> 
             "and (:type is null or e.type = :type) and (:from is null or e.createdAt >= :from) " +
             "and (:to is null or e.createdAt < :to) and (:minAmount is null or e.amount >= :minAmount) " +
             "and (:maxAmount is null or e.amount <= :maxAmount) " +
-            "and (:search is null or lower(e.description) like lower(concat('%', :search, '%')))",
+            "and (:search = '' or lower(e.description) like lower(concat('%', :search, '%')))",
             countQuery = "select count(e) from LedgerEntry e where e.account.id = :accountId " +
             "and (:type is null or e.type = :type) and (:from is null or e.createdAt >= :from) " +
             "and (:to is null or e.createdAt < :to) and (:minAmount is null or e.amount >= :minAmount) " +
             "and (:maxAmount is null or e.amount <= :maxAmount) " +
-            "and (:search is null or lower(e.description) like lower(concat('%', :search, '%')))")
+            "and (:search = '' or lower(e.description) like lower(concat('%', :search, '%')))")
     Page<LedgerEntry> search(@Param("accountId") UUID accountId,
                              @Param("type") Enums.LedgerType type,
                              @Param("from") Instant from,

@@ -24,13 +24,13 @@ public interface TransferRepository extends JpaRepository<Transfer, UUID> {
     Page<Transfer> findForAccount(@Param("accountId") UUID accountId, Pageable pageable);
 
     @Query(value = "select t from Transfer t join t.sourceAccount s join s.user su join t.destinationAccount d join d.user du where " +
-            "(:search is null or lower(t.publicId) like lower(concat('%', :search, '%')) " +
+            "(:search = '' or lower(t.publicId) like lower(concat('%', :search, '%')) " +
             "or lower(t.endToEndId) like lower(concat('%', :search, '%')) or lower(su.fullName) like lower(concat('%', :search, '%')) " +
             "or lower(du.fullName) like lower(concat('%', :search, '%'))) and (:status is null or t.status = :status) " +
             "and (:minAmount is null or t.amount >= :minAmount) and (:maxAmount is null or t.amount <= :maxAmount) " +
             "and (:from is null or t.createdAt >= :from) and (:to is null or t.createdAt < :to)",
            countQuery = "select count(t) from Transfer t join t.sourceAccount s join s.user su join t.destinationAccount d join d.user du where " +
-            "(:search is null or lower(t.publicId) like lower(concat('%', :search, '%')) " +
+            "(:search = '' or lower(t.publicId) like lower(concat('%', :search, '%')) " +
             "or lower(t.endToEndId) like lower(concat('%', :search, '%')) or lower(su.fullName) like lower(concat('%', :search, '%')) " +
             "or lower(du.fullName) like lower(concat('%', :search, '%'))) and (:status is null or t.status = :status) " +
             "and (:minAmount is null or t.amount >= :minAmount) and (:maxAmount is null or t.amount <= :maxAmount) " +

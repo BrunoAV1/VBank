@@ -7,6 +7,7 @@ import dev.brunovasconcellos.vbank.repository.AccountRepository;
 import dev.brunovasconcellos.vbank.repository.TransferRepository;
 import dev.brunovasconcellos.vbank.repository.UserRepository;
 import dev.brunovasconcellos.vbank.service.AdminService;
+import dev.brunovasconcellos.vbank.service.AccountService;
 import dev.brunovasconcellos.vbank.service.AuthService;
 import dev.brunovasconcellos.vbank.service.FundingService;
 import dev.brunovasconcellos.vbank.service.PinService;
@@ -62,6 +63,7 @@ class BankFlowIT {
     @Autowired TransferService transferService;
     @Autowired FundingService fundingService;
     @Autowired AdminService adminService;
+    @Autowired AccountService accountService;
     @Autowired UserRepository userRepository;
     @Autowired AccountRepository accountRepository;
     @Autowired TransferRepository transferRepository;
@@ -96,6 +98,9 @@ class BankFlowIT {
                         error -> assertThat(error.getCode()).isEqualTo("DUPLICATE_IDEMPOTENCY_KEY"));
         assertThat(accountRepository.findByUserId(aliceId).orElseThrow().getBalance()).isEqualByComparingTo("49000.00");
         assertThat(accountRepository.findByUserId(brunoId).orElseThrow().getBalance()).isEqualByComparingTo("51000.00");
+
+        assertThat(accountService.dashboard(aliceId).recentEntries()).isNotEmpty();
+        assertThat(accountService.statement(aliceId, null, null, null, null, null, null, Pageable.unpaged())).isNotEmpty();
 
         pixKeyService.create(aliceId, new ApiDtos.PixKeyRequest(Enums.PixKeyType.USERNAME, "@alice"));
         assertThatThrownBy(() -> transferService.transfer(aliceId,
@@ -150,6 +155,9 @@ class BankFlowIT {
         assertThat(sourceBalance.add(destinationBalance)).isEqualByComparingTo("100000.00");
 
         var admin = userRepository.findByUsername("admin").orElseThrow();
+        assertThat(adminService.users(null, Pageable.unpaged())).isNotEmpty();
+        assertThat(adminService.transfers(null, null, null, null, null, null, Pageable.unpaged())).isNotEmpty();
+        assertThat(adminService.audits(null, Pageable.unpaged())).isNotEmpty();
         var brunoAccount = accountRepository.findByUserId(brunoId).orElseThrow();
         adminService.block(admin.getId(), brunoAccount.getId());
         assertThat(accountRepository.findById(brunoAccount.getId()).orElseThrow().getStatus()).isEqualTo(Enums.AccountStatus.TEMPORARILY_BLOCKED);

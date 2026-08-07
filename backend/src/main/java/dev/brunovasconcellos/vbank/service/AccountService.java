@@ -50,13 +50,13 @@ public class AccountService {
                                                        BigDecimal maxAmount, String search, Pageable pageable) {
         Account account = requireAccount(userId);
         return ledgerRepository.search(account.getId(), type, from, to, minAmount, maxAmount,
-                blankToNull(search), pageable).map(DtoMapper::ledger);
+                normalizedSearch(search), pageable).map(DtoMapper::ledger);
     }
 
     @Transactional(readOnly = true)
     public ApiDtos.DashboardResponse dashboard(UUID userId) {
         Account account = requireAccount(userId);
-        var recent = ledgerRepository.search(account.getId(), null, null, null, null, null, null,
+        var recent = ledgerRepository.search(account.getId(), null, null, null, null, null, "",
                 PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"))).map(DtoMapper::ledger).getContent();
         var keys = pixKeyRepository.findByAccountAndStatus(account.getId(), Enums.PixKeyStatus.ACTIVE).stream().map(DtoMapper::pix).toList();
         long unread = notificationRepository.findByUserId(userId, Pageable.unpaged()).stream().filter(item -> !item.isRead()).count();
@@ -68,5 +68,5 @@ public class AccountService {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "VALIDATION_ERROR", "Conta não encontrada."));
     }
 
-    private String blankToNull(String value) { return value == null || value.isBlank() ? null : value.trim(); }
+    private String normalizedSearch(String value) { return value == null || value.isBlank() ? "" : value.trim(); }
 }

@@ -10,8 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.UUID;
 
 public interface AuditLogRepository extends JpaRepository<AuditLog, UUID> {
-    @Query(value = "select a from AuditLog a where :search is null or lower(a.action) like lower(concat('%', :search, '%')) or lower(a.actorLabel) like lower(concat('%', :search, '%')) or lower(a.targetId) like lower(concat('%', :search, '%'))",
-           countQuery = "select count(a) from AuditLog a where :search is null or lower(a.action) like lower(concat('%', :search, '%')) or lower(a.actorLabel) like lower(concat('%', :search, '%')) or lower(a.targetId) like lower(concat('%', :search, '%'))")
+    @Query(value = "select a from AuditLog a where :search = '' or lower(a.action) like lower(concat('%', :search, '%')) or lower(a.actorLabel) like lower(concat('%', :search, '%')) or lower(a.targetId) like lower(concat('%', :search, '%'))",
+           countQuery = "select count(a) from AuditLog a where :search = '' or lower(a.action) like lower(concat('%', :search, '%')) or lower(a.actorLabel) like lower(concat('%', :search, '%')) or lower(a.targetId) like lower(concat('%', :search, '%'))")
     Page<AuditLog> search(@Param("search") String search, Pageable pageable);
 }
-

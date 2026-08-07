@@ -25,7 +25,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("select u from User u where u.id = :id")
     Optional<User> findLockedById(@Param("id") UUID id);
 
-    @Query("select u from User u where :search is null or lower(u.fullName) like lower(concat('%', :search, '%')) or lower(u.email) like lower(concat('%', :search, '%')) or lower(u.username) like lower(concat('%', :search, '%'))")
+    @Query("select u from User u where :search = '' or lower(u.fullName) like lower(concat('%', :search, '%')) or lower(u.email) like lower(concat('%', :search, '%')) or lower(u.username) like lower(concat('%', :search, '%'))")
     Page<User> search(@Param("search") String search, Pageable pageable);
 }
-

@@ -142,5 +142,5 @@ public class AdminService {
     private void rejectSystem(Account account) {
         if (account.getStatus() == Enums.AccountStatus.SYSTEM) throw new ApiException(HttpStatus.FORBIDDEN, "ACCOUNT_BLOCKED", "A conta interna do sistema não pode ser alterada por esta API.");
     }
-    private String blank(String value) { return value == null || value.isBlank() ? null : value.trim(); }
+    private String blank(String value) { return value == null || value.isBlank() ? "" : value.trim(); }
 }

@@ -15,13 +15,20 @@ COPY backend/src ./src
 COPY --from=frontend-build /workspace/frontend/dist ./src/main/resources/static
 RUN mvn -B -ntp -DskipTests package
 
+FROM golang:1.24-alpine AS startup-proxy-build
+WORKDIR /workspace/startup-proxy
+COPY vercel/startup-proxy/main.go ./
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /startup-proxy main.go
+
 FROM eclipse-temurin:21-jre-alpine
 RUN addgroup -S vbank && adduser -S -G vbank -h /app vbank
 WORKDIR /app
 COPY --from=backend-build --chown=vbank:vbank /workspace/backend/target/vbank-sandbox-1.0.0.jar /app/vbank.jar
+COPY --from=startup-proxy-build --chown=vbank:vbank /startup-proxy /app/startup-proxy
 RUN /opt/java/openjdk/bin/java --version
 USER vbank
 ENV PORT=8080
+ENV BACKEND_PORT=18080
 EXPOSE 8080
 STOPSIGNAL SIGTERM
-CMD ["/opt/java/openjdk/bin/java", "-XX:MaxRAMPercentage=75", "-XX:+UseSerialGC", "-XX:TieredStopAtLevel=1", "-Djava.security.egd=file:/dev/urandom", "-jar", "/app/vbank.jar"]
+CMD ["/app/startup-proxy"]

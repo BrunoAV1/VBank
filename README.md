@@ -2,6 +2,12 @@
 
 > Ambiente bancário fictício para demonstração, aprendizado e testes. Nenhum valor ou transferência realizada nesta plataforma possui valor financeiro real.
 
+## Acesso ao projeto
+
+- **Aplicação publicada:** [https://v-bank-three.vercel.app/](https://v-bank-three.vercel.app/)
+- **Health check:** [https://v-bank-three.vercel.app/api/health](https://v-bank-three.vercel.app/api/health)
+
+
 O VBank Sandbox é um simulador educacional, aberto e sob licença MIT. Ele demonstra como construir uma aplicação transacional com Java 21, Spring Boot, React, TypeScript e PostgreSQL sem integrar Pix real, bancos, Banco Central, Open Finance, cartões, boletos, criptomoedas, e-mail ou SMS.
 
 Cada conta de demonstração recebe **R$ 50.000,00 fictícios**. Usuários criam chaves internas, localizam outra conta, transferem saldo sandbox, consultam ledger/extrato, recebem notificações e baixam comprovantes PDF. O backend é sempre a fonte da verdade.

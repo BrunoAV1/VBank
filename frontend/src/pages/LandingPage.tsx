@@ -41,7 +41,7 @@ export default function LandingPage() {
           <div className="feature-grid">{features.map(([icon, title, text]) => <article className="feature-card" key={title}><span>{icon}</span><h3>{title}</h3><p>{text}</p></article>)}</div>
         </section>
         <section className="tech-section" id="tecnologia">
-          <div><span className="eyebrow">Arquitetura aberta</span><h2>React e Spring Boot no mesmo deploy</h2><p>O frontend compilado é servido pela API, que persiste exclusivamente no PostgreSQL Neon. O Dockerfile remoto empacota tudo sem exigir Docker local.</p><a href="https://github.com/BrunoAV1/vbank-sandbox" target="_blank" rel="noreferrer">Ver projeto no GitHub →</a></div>
+          <div><span className="eyebrow">Arquitetura aberta</span><h2>React e Spring Boot no mesmo deploy</h2><p>O frontend compilado é servido pela API, que persiste exclusivamente no PostgreSQL Neon. O Dockerfile remoto empacota tudo sem exigir Docker local.</p><a href="https://github.com/BrunoAV1/VBank" target="_blank" rel="noreferrer">Ver projeto no GitHub →</a></div>
           <div className="architecture-line"><span>React + TypeScript</span><i>→</i><span>Spring Boot</span><i>→</i><span>PostgreSQL</span></div>
         </section>
       </main>

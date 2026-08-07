@@ -19,10 +19,9 @@ FROM eclipse-temurin:21-jre-alpine
 RUN addgroup -S vbank && adduser -S -G vbank -h /app vbank
 WORKDIR /app
 COPY --from=backend-build --chown=vbank:vbank /workspace/backend/target/vbank-sandbox-1.0.0.jar /app/vbank.jar
+RUN /opt/java/openjdk/bin/java --version
 USER vbank
 ENV PORT=8080
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom"
 EXPOSE 8080
 STOPSIGNAL SIGTERM
-CMD ["sh", "-c", "exec java $JAVA_OPTS -jar /app/vbank.jar"]
-
+CMD ["/opt/java/openjdk/bin/java", "-XX:MaxRAMPercentage=75", "-XX:+UseG1GC", "-Djava.security.egd=file:/dev/urandom", "-jar", "/app/vbank.jar"]

@@ -6,6 +6,7 @@ import dev.brunovasconcellos.vbank.domain.Account;
 import dev.brunovasconcellos.vbank.domain.Enums;
 import dev.brunovasconcellos.vbank.domain.LedgerEntry;
 import dev.brunovasconcellos.vbank.domain.Notification;
+import dev.brunovasconcellos.vbank.domain.Transfer;
 import dev.brunovasconcellos.vbank.domain.User;
 import dev.brunovasconcellos.vbank.repository.AccountRepository;
 import dev.brunovasconcellos.vbank.repository.AuditLogRepository;
@@ -16,6 +17,7 @@ import dev.brunovasconcellos.vbank.repository.TransferRepository;
 import dev.brunovasconcellos.vbank.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
@@ -129,7 +133,7 @@ public class AdminService {
     public Page<ApiDtos.TransferResponse> transfers(String search, Enums.TransferStatus status,
                                                      BigDecimal minAmount, BigDecimal maxAmount,
                                                      Instant from, Instant to, Pageable pageable) {
-        return transferRepository.search(blank(search), status, minAmount, maxAmount, from, to, pageable)
+        return transferRepository.findAll(transferFilters(blank(search), status, minAmount, maxAmount, from, to), pageable)
                 .map(DtoMapper::transfer);
     }
 
@@ -143,4 +147,28 @@ public class AdminService {
         if (account.getStatus() == Enums.AccountStatus.SYSTEM) throw new ApiException(HttpStatus.FORBIDDEN, "ACCOUNT_BLOCKED", "A conta interna do sistema não pode ser alterada por esta API.");
     }
     private String blank(String value) { return value == null || value.isBlank() ? "" : value.trim(); }
+
+    private Specification<Transfer> transferFilters(String search, Enums.TransferStatus status,
+                                                     BigDecimal minAmount, BigDecimal maxAmount,
+                                                     Instant from, Instant to) {
+        return (root, query, criteria) -> {
+            var predicates = new ArrayList<jakarta.persistence.criteria.Predicate>();
+            if (!search.isEmpty()) {
+                String pattern = "%" + search.toLowerCase(Locale.ROOT) + "%";
+                var sourceUser = root.join("sourceAccount").join("user");
+                var destinationUser = root.join("destinationAccount").join("user");
+                predicates.add(criteria.or(
+                        criteria.like(criteria.lower(root.<String>get("publicId")), pattern),
+                        criteria.like(criteria.lower(root.<String>get("endToEndId")), pattern),
+                        criteria.like(criteria.lower(sourceUser.<String>get("fullName")), pattern),
+                        criteria.like(criteria.lower(destinationUser.<String>get("fullName")), pattern)));
+            }
+            if (status != null) predicates.add(criteria.equal(root.<Enums.TransferStatus>get("status"), status));
+            if (minAmount != null) predicates.add(criteria.greaterThanOrEqualTo(root.<BigDecimal>get("amount"), minAmount));
+            if (maxAmount != null) predicates.add(criteria.lessThanOrEqualTo(root.<BigDecimal>get("amount"), maxAmount));
+            if (from != null) predicates.add(criteria.greaterThanOrEqualTo(root.<Instant>get("createdAt"), from));
+            if (to != null) predicates.add(criteria.lessThan(root.<Instant>get("createdAt"), to));
+            return criteria.and(predicates.toArray(jakarta.persistence.criteria.Predicate[]::new));
+        };
+    }
 }

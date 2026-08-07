@@ -4,7 +4,6 @@ import dev.brunovasconcellos.vbank.api.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
@@ -22,7 +21,7 @@ public class RateLimitService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void consume(String scope, String subject, int maximum, Duration window) {
         String key = scope + ":" + sha256(subject == null ? "unknown" : subject);
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);

@@ -107,7 +107,7 @@ public class AuthService {
         return createSession(user, deviceSummary);
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = ApiException.class)
     public SessionTokens login(ApiDtos.LoginRequest request, String clientFingerprint, String deviceSummary) {
         String identifier = normalizeIdentifier(request.identifier());
         rateLimitService.consume("login", clientFingerprint + ":" + identifier, 10, Duration.ofMinutes(15));

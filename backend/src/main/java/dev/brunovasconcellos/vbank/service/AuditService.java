@@ -4,7 +4,6 @@ import dev.brunovasconcellos.vbank.domain.AuditLog;
 import dev.brunovasconcellos.vbank.domain.User;
 import dev.brunovasconcellos.vbank.repository.AuditLogRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -20,7 +19,7 @@ public class AuditService {
         repository.save(new AuditLog(user, action, outcome, actor, targetType, targetId, sanitize(metadata)));
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void recordFailure(User user, String action, String actorLabel, String metadata) {
         repository.save(new AuditLog(user, action, "DENIED", sanitize(actorLabel), null, null, sanitize(metadata)));
     }

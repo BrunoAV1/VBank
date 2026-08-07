@@ -24,4 +24,4 @@ USER vbank
 ENV PORT=8080
 EXPOSE 8080
 STOPSIGNAL SIGTERM
-CMD ["/opt/java/openjdk/bin/java", "-XX:MaxRAMPercentage=75", "-XX:+UseG1GC", "-Djava.security.egd=file:/dev/urandom", "-jar", "/app/vbank.jar"]
+CMD ["/opt/java/openjdk/bin/java", "-XX:MaxRAMPercentage=75", "-XX:+UseSerialGC", "-XX:TieredStopAtLevel=1", "-Djava.security.egd=file:/dev/urandom", "-jar", "/app/vbank.jar"]

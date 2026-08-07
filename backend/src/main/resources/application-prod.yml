@@ -1,6 +1,12 @@
 server:
   forward-headers-strategy: framework
 spring:
+  main:
+    lazy-initialization: true
+  data:
+    jpa:
+      repositories:
+        bootstrap-mode: lazy
   jpa:
     hibernate:
       ddl-auto: validate
@@ -13,4 +19,3 @@ logging:
   level:
     root: INFO
     org.hibernate.SQL: WARN
-
